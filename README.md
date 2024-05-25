@@ -1,8 +1,6 @@
 # BedlessChat
 A (somewhat) lightweight instant messaging client that i am making (its bad)
 
-defaults to settings for me!
-change default ip to whatever you want.
+defaults to my server and no username, username is in the top left.
 
-roadmap:
-this -> nicknames -> message history -> servers?
+Roadmap currently unknown. Will do some updates. Plan to get working on 3ds.
