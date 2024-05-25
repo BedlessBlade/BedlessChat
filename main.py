@@ -13,11 +13,10 @@ def receive_messages():
         try:
             message = client_socket.recv(1024).decode()
             if message:
-                history = str(message_history_box.get("1.0", "end-1c")) + f"{message}\n"
                 message_history_box.config(state=NORMAL)
-                message_history_box.delete("1.0", "end")
-                message_history_box.insert("1.0", history)
+                message_history_box.insert(END, f"{message}\n")
                 message_history_box.config(state=DISABLED)
+                message_history_box.see(END)  # Scroll to the end
         except Exception as e:
             print(f"Error receiving message: {e}")
             break
@@ -50,11 +49,10 @@ def send_text(event=None):
     if text:
         client_socket.sendall(usertext.encode())
         text_box.delete("1.0", "end")
-        history = str(message_history_box.get("1.0", "end-1c")) + f"\nYou: {text}\n"
         message_history_box.config(state=NORMAL)
-        message_history_box.delete("1.0", "end")
-        message_history_box.insert("1.0", history)
+        message_history_box.insert(END, f"\nYou: {text}\n")
         message_history_box.config(state=DISABLED)
+        message_history_box.see(END)  # Scroll to the end
         time.sleep(0.1)
     if event:
         return "break"
@@ -95,7 +93,7 @@ lastused = file.readlines()[0]
 file.close()
 server_ip_box.insert("1.0", lastused)
 
-image = Image.open("bedless.png").rotate(-90, expand=True).resize((54, 346), Image.ANTIALIAS)
+image = Image.open("bedless.png").rotate(-90, expand=True).resize((54, 346))
 photo = ImageTk.PhotoImage(image)
 label = Label(root, image=photo, bg='teal')
 label.image = photo
@@ -124,4 +122,3 @@ style.configure('LimeGreen.TButton', padding=(0, 8), background='lime green')
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
 root.mainloop()
-
