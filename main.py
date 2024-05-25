@@ -29,7 +29,7 @@ def setup_connection():
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((server_ip, 50000))
             start_thread(receive_messages)
-            print("Connected to server at", server_ip)
+            output_to_box(str("\nConnected to server at " + server_ip + "."))
         except Exception as e:
             print(f"Failed to connect to server: {e}")
     else:
@@ -40,15 +40,21 @@ def setup_connection():
     file2 = open("lastuser.txt", "w")
     file2.write(username_box.get("1.0", "end-1c"))
     file2.close()
+    global socketopen
+    socketopen = True
 
-def send_text(event=None):
+def send_text(event=None, message=None):
     username = username_box.get("1.0", "end-1c")
     global client_socket
-    text = text_box.get("1.0", "end-1c").strip()
+    if message is None:
+        text = text_box.get("1.0", "end-1c").strip()
+    else:
+        text = message.strip()
     usertext = str(username) + ": " + text
     if text:
         client_socket.sendall(usertext.encode())
-        text_box.delete("1.0", "end")
+        if message is None:
+            text_box.delete("1.0", "end")
         message_history_box.config(state=NORMAL)
         message_history_box.insert(END, f"\nYou: {text}\n")
         message_history_box.config(state=DISABLED)
@@ -56,6 +62,17 @@ def send_text(event=None):
         time.sleep(0.1)
     if event:
         return "break"
+
+def disconnect():
+    global client_socket
+    if client_socket:
+        global socketopen
+        if socketopen == True:
+            client_socket.close()
+            output_to_box("Disconnected from server.\n")
+            socketopen = False
+        else:
+            output_to_box("No open server connections were found.\n")
 
 def on_closing():
     global client_socket
@@ -66,6 +83,12 @@ def on_closing():
 def start_thread(func_name):
     thread = threading.Thread(target=func_name, daemon=True)
     thread.start()
+
+def output_to_box(toprint):
+    message_history_box.config(state=NORMAL)
+    message_history_box.insert(END, toprint)
+    message_history_box.config(state=DISABLED)
+    message_history_box.see(END)
 
 root = Tk()
 root.geometry("750x450")
@@ -112,6 +135,9 @@ message_history_box.config(state=DISABLED)
 
 button = ttk.Button(root, text="Send", command=send_text, style='LimeGreen.TButton')
 button.grid(row=1, column=1, sticky='se')
+
+disconnectbutton = ttk.Button(root, text="Disconnect", command=disconnect, style='LimeGreen.TButton')
+disconnectbutton.grid(row=0, column=0, sticky='sw', padx=10, pady=40)
 
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(0, weight=1)
