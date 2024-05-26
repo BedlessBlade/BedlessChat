@@ -4,8 +4,63 @@ import socket
 import threading
 from PIL import Image, ImageTk
 import time
+import pyaudio
+import wave
 
 client_socket = None
+window_focused = False
+
+def message_sound():
+    if window_focused == False:
+        play_wave('sound.wav')
+    else:
+        pass
+
+def play_wave(filename):
+    # Open the wave file
+    wf = wave.open(filename, 'rb')
+
+    # Create a PyAudio object
+    p = pyaudio.PyAudio()
+
+    # Check for default output device
+    if p.get_default_output_device_info() is None:
+        print("No default output device available.")
+        p.terminate()
+        return
+
+    try:
+        # Open a stream on the correct format
+        stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                        channels=wf.getnchannels(),
+                        rate=wf.getframerate(),
+                        output=True)
+
+        # Read data in chunks
+        chunk_size = 1024
+        data = wf.readframes(chunk_size)
+
+        # Play the sound by writing the audio data to the stream
+        while data:
+            stream.write(data)
+            data = wf.readframes(chunk_size)
+
+    except Exception as e:
+        print(f"Failed to play sound: {e}")
+
+    finally:
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+        wf.close()
+
+def on_focus_in(event):
+    global window_focused
+    window_focused = True
+
+def on_focus_out(event):
+    global window_focused
+    window_focused = False
 
 def receive_messages():
     global client_socket
@@ -13,6 +68,7 @@ def receive_messages():
         try:
             message = client_socket.recv(1024).decode()
             if message:
+                message_sound()
                 message_history_box.config(state=NORMAL)
                 message_history_box.insert(END, f"\n{message}")
                 message_history_box.config(state=DISABLED)
@@ -94,6 +150,8 @@ root = Tk()
 root.geometry("750x450")
 root.title("BedlessChat Alpha 9")
 root.configure(background='teal')
+root.bind("<FocusIn>", on_focus_in)
+root.bind("<FocusOut>", on_focus_out)
 
 server_ip_label = Label(root, text="Server IP:", bg='teal')
 server_ip_label.grid(row=0, column=0, sticky='sw', padx=10, pady=10)
@@ -148,6 +206,4 @@ style.configure('LimeGreen.TButton', padding=(0, 8), background='lime green')
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
 root.mainloop()
-
-
 
