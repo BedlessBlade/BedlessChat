@@ -78,6 +78,7 @@ def receive_messages():
             break
 
 def setup_connection():
+    disconnect()
     global client_socket
     server_ip = server_ip_box.get("1.0", "end-1c").strip()
     if server_ip:
