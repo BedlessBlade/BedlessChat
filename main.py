@@ -16,6 +16,16 @@ def message_sound():
     else:
         pass
 
+def joinmsg():
+    username = username_box.get("1.0", "end-1c").strip()
+    text_to_send = str(username) + " has joined the chat."
+    client_socket.sendall(text_to_send.encode())
+
+def leavemsg():
+    username = username_box.get("1.0", "end-1c").strip()
+    text_to_send = str(username) + " has left the chat."
+    client_socket.sendall(text_to_send.encode())
+
 def play_wave(filename):
     # Open the wave file
     wf = wave.open(filename, 'rb')
@@ -99,15 +109,18 @@ def setup_connection():
     file2.close()
     global socketopen
     socketopen = True
+    joinmsg()
+
 
 def send_text(event=None, message=None):
     username = username_box.get("1.0", "end-1c")
     global client_socket
     if message is None:
         text = text_box.get("1.0", "end-1c").strip()
+        usertext = str(username).strip("\n") + ": " + text
     else:
         text = message.strip()
-    usertext = str(username).strip("\n") + ": " + text
+        usertext = str(username).strip("\n") + " " + text
     if text:
         client_socket.sendall(usertext.encode())
         if message is None:
@@ -116,7 +129,6 @@ def send_text(event=None, message=None):
         message_history_box.insert(END, f"\nYou: {text}")
         message_history_box.config(state=DISABLED)
         message_history_box.see(END)  # Scroll to the end
-        time.sleep(0.1)
     if event:
         return "break"
 
@@ -125,6 +137,7 @@ def disconnect():
     if client_socket:
         global socketopen
         if socketopen == True:
+            leavemsg()
             client_socket.close()
             output_to_box("\nDisconnected from server.\n")
             socketopen = False
@@ -142,6 +155,7 @@ def disconnect_silent():
             pass
 
 def on_closing():
+    leavemsg()
     global client_socket
     if client_socket:
         client_socket.close()
