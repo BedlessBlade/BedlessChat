@@ -74,11 +74,11 @@ def receive_messages():
                 message_history_box.config(state=DISABLED)
                 message_history_box.see(END)  # Scroll to the end
         except Exception as e:
-            output_to_box(f"Error receiving message: {e}\n")
+            output_to_box(f"\nError receiving message: {e}\n")
             break
 
 def setup_connection():
-    disconnect()
+    disconnect_silent()
     global client_socket
     server_ip = server_ip_box.get("1.0", "end-1c").strip()
     if server_ip:
@@ -88,9 +88,9 @@ def setup_connection():
             start_thread(receive_messages)
             output_to_box(str("\nConnected to server at " + server_ip + "."))
         except Exception as e:
-            output_to_box(f"Failed to connect to server: {e}\n")
+            output_to_box(f"\nFailed to connect to server: {e}\n")
     else:
-        output_to_box("Please enter a valid server IP address.\n")
+        output_to_box("\nPlease enter a valid server IP address.\n")
     file = open("lastused.txt", "w")
     file.write(server_ip_box.get("1.0", "end-1c"))
     file.close()
@@ -126,10 +126,20 @@ def disconnect():
         global socketopen
         if socketopen == True:
             client_socket.close()
-            output_to_box("Disconnected from server.\n")
+            output_to_box("\nDisconnected from server.\n")
             socketopen = False
         else:
-            output_to_box("No open server connections were found.\n")
+            output_to_box("\nNo open server connections were found.\n")
+
+def disconnect_silent():
+    global client_socket
+    if client_socket:
+        global socketopen
+        if socketopen == True:
+            client_socket.close()
+            socketopen = False
+        else:
+            pass
 
 def on_closing():
     global client_socket
@@ -149,7 +159,7 @@ def output_to_box(toprint):
 
 root = Tk()
 root.geometry("750x450")
-root.title("BedlessChat Alpha 9")
+root.title("BedlessChat Release 1.0.2")
 root.configure(background='teal')
 root.bind("<FocusIn>", on_focus_in)
 root.bind("<FocusOut>", on_focus_out)
