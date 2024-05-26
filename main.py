@@ -14,11 +14,11 @@ def receive_messages():
             message = client_socket.recv(1024).decode()
             if message:
                 message_history_box.config(state=NORMAL)
-                message_history_box.insert(END, f"{message}\n")
+                message_history_box.insert(END, f"\n{message}")
                 message_history_box.config(state=DISABLED)
                 message_history_box.see(END)  # Scroll to the end
         except Exception as e:
-            print(f"Error receiving message: {e}")
+            output_to_box(f"Error receiving message: {e}\n")
             break
 
 def setup_connection():
@@ -31,9 +31,9 @@ def setup_connection():
             start_thread(receive_messages)
             output_to_box(str("\nConnected to server at " + server_ip + "."))
         except Exception as e:
-            print(f"Failed to connect to server: {e}")
+            output_to_box(f"Failed to connect to server: {e}\n")
     else:
-        print("Please enter a valid server IP address.")
+        output_to_box("Please enter a valid server IP address.\n")
     file = open("lastused.txt", "w")
     file.write(server_ip_box.get("1.0", "end-1c"))
     file.close()
@@ -50,13 +50,13 @@ def send_text(event=None, message=None):
         text = text_box.get("1.0", "end-1c").strip()
     else:
         text = message.strip()
-    usertext = str(username) + ": " + text
+    usertext = str(username).strip("\n") + ": " + text
     if text:
         client_socket.sendall(usertext.encode())
         if message is None:
             text_box.delete("1.0", "end")
         message_history_box.config(state=NORMAL)
-        message_history_box.insert(END, f"\nYou: {text}\n")
+        message_history_box.insert(END, f"\nYou: {text}")
         message_history_box.config(state=DISABLED)
         message_history_box.see(END)  # Scroll to the end
         time.sleep(0.1)
@@ -98,13 +98,13 @@ root.configure(background='teal')
 server_ip_label = Label(root, text="Server IP:", bg='teal')
 server_ip_label.grid(row=0, column=0, sticky='sw', padx=10, pady=10)
 
-server_ip_box = Text(root, height=1, width=15)
+server_ip_box = Text(root, height=1, width=15, bg='orange')
 server_ip_box.grid(row=1, column=0, sticky='w', padx=10)
 
 username_box_label = Label(root, text="Username", bg='teal')
 username_box_label.grid(row=0, column=0, sticky='nw', pady=20, padx=10)
 
-username_box = Text(root, height=1, width=15)
+username_box = Text(root, height=1, width=15, bg='green')
 username_box.grid(row=0, column=0, sticky='nw', padx=10)
 
 lastuser = open("lastuser.txt", "r")
@@ -125,16 +125,16 @@ label.grid(row=0, column=1, sticky='ne')
 connect_button = ttk.Button(root, text="Connect", command=setup_connection, style='LimeGreen.TButton')
 connect_button.grid(row=2, column=0, sticky='w', padx=10, pady=10)
 
-text_box = Text(root, height=1.5, width=50)
-text_box.grid(row=1, column=0, sticky='se')
+text_box = Text(root, height=1.5, width=60, bg='light blue')
+text_box.grid(row=2, column=0, sticky='se')
 text_box.bind("<Return>", send_text)
 
-message_history_box = Text(root, height=20, width=50)
+message_history_box = Text(root, height=35, width=60, bg='gray')
 message_history_box.grid(row=0, column=0, sticky='ne')
 message_history_box.config(state=DISABLED)
 
 button = ttk.Button(root, text="Send", command=send_text, style='LimeGreen.TButton')
-button.grid(row=1, column=1, sticky='se')
+button.grid(row=2, column=1, sticky='se')
 
 disconnectbutton = ttk.Button(root, text="Disconnect", command=disconnect, style='LimeGreen.TButton')
 disconnectbutton.grid(row=0, column=0, sticky='sw', padx=10, pady=40)
@@ -148,3 +148,6 @@ style.configure('LimeGreen.TButton', padding=(0, 8), background='lime green')
 root.protocol("WM_DELETE_WINDOW", on_closing)
 
 root.mainloop()
+
+
+
