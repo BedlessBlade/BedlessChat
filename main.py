@@ -22,9 +22,10 @@ def joinmsg():
     client_socket.sendall(text_to_send.encode())
 
 def leavemsg():
-    username = username_box.get("1.0", "end-1c").strip()
-    text_to_send = str(username) + " has left the chat."
-    client_socket.sendall(text_to_send.encode())
+    if 
+        username = username_box.get("1.0", "end-1c").strip()
+        text_to_send = str(username) + " has left the chat."
+        client_socket.sendall(text_to_send.encode())
 
 def play_wave(filename):
     # Open the wave file
@@ -155,10 +156,12 @@ def disconnect_silent():
             pass
 
 def on_closing():
-    leavemsg()
     global client_socket
     if client_socket:
+        leavemsg()
         client_socket.close()
+    else:
+        pass
     root.destroy()
 
 def start_thread(func_name):
