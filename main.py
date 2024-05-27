@@ -22,7 +22,8 @@ def joinmsg():
     client_socket.sendall(text_to_send.encode())
 
 def leavemsg():
-    if 
+    global socketopen
+    if socketopen == True:
         username = username_box.get("1.0", "end-1c").strip()
         text_to_send = str(username) + " has left the chat."
         client_socket.sendall(text_to_send.encode())
